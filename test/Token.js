@@ -10,9 +10,6 @@ const {ethers} = require("hardhat");
     const deciamls = 18;
     const totalSupply = 100000;
 
-    // We define a fixture to reuse the same setup in every test.
-    // We use loadFixture to run this setup once, snapshot that state,
-    // and reset Hardhat Network to that snapshot in every test.
     const deployToken = async(name, symbol, totalSupply) => {
         const Token = await ethers.getContractFactory("Token");
         const token = await Token.deploy(name, symbol, totalSupply);
@@ -32,6 +29,7 @@ const {ethers} = require("hardhat");
         accounts = await ethers.getSigners();
         deployer = accounts[0];
         receiver1 = accounts[1];
+        exchange = accounts[2];
     })
 
   
@@ -60,12 +58,12 @@ const {ethers} = require("hardhat");
         describe("Success", () => {
             it("Transfers token balances", async() => {
                 amount = 100;
-                const deployerAmount0 = await token.balanceOf(deployer.address);
-                const receiverAmount0 = await token.balanceOf(receiver1.address);
+                let deployerAmount0 = await token.balanceOf(deployer.address);
+                let receiverAmount0 = await token.balanceOf(receiver1.address);
                 transaction = await token.connect(deployer).transfer(receiver1.address, toWei(amount));
                 result = await transaction.wait()
-                const deployerAmount1 = await token.balanceOf(deployer.address);
-                const receiverAmount1 = await token.balanceOf(receiver1.address);
+                let deployerAmount1 = await token.balanceOf(deployer.address);
+                let receiverAmount1 = await token.balanceOf(receiver1.address);
                 expect(deployerAmount1).to.equal(toWei(Number(fromWei(deployerAmount0))-amount))
                 expect(receiverAmount1).to.equal(toWei(Number(fromWei(receiverAmount0))+amount))
             });
@@ -88,6 +86,77 @@ const {ethers} = require("hardhat");
                 await expect(token.connect(deployer).transfer("0x0000000000000000000000000000000000000000", 1)).to.be.reverted;
             })
         })
+    })
+
+    describe("Approving Token", () => {
+      let amount, transaction, result;
+
+      beforeEach(async() => {
+        amount = toWei(100)
+        transaction = await token.connect(deployer).approve(exchange.address,amount)
+        result = await transaction.wait()
+      })
+
+      describe("Success", async() => {
+        it("Allocation an allowance", async() => {
+          expect(await token.allowance(deployer.address, exchange.address)).to.equal(amount)
+        })
+
+        it("Emits an Approval Event", async() => {
+          const event = result.events[0];
+          expect(event.event).to.equal("Approval");
+          const args = event.args;
+          expect(args._owner).to.equal(deployer.address)
+          expect(args._spender).to.equal(exchange.address)
+          expect(args._value).to.equal(amount)
+        })
+
+      })
+
+      describe("Failure", () => {
+        it("Rejects invalid address", async() => {
+          await expect(token.connect(deployer).approve("0x0000000000000000000000000000000000000000", amount)).to.be.reverted;
+      })
+      })
+    })
+
+    describe("Transfer Token with Delegation", () => {
+      let amount, transaction, result;
+
+      beforeEach(async() => {
+        amount = toWei(100)
+        await token.connect(deployer).approve(exchange.address,amount)
+      })
+
+      describe("Success", async() => {
+        it("Transfer Success", async() => {
+          let deployerAmount0 = await token.balanceOf(deployer.address);
+          let receiverAmount0 = await token.balanceOf(receiver1.address);
+          let allowance = await token.allowance(deployer.address, exchange.address);
+          transaction = await token.connect(exchange).transferFrom(deployer.address,receiver1.address, amount);
+          result = await transaction.wait()
+          let deployerAmount1 = await token.balanceOf(deployer.address);
+          let receiverAmount1 = await token.balanceOf(receiver1.address);
+          expect(deployerAmount1).to.equal(ethers.BigNumber.from(deployerAmount0).sub(amount))
+          expect(receiverAmount1).to.equal(ethers.BigNumber.from(receiverAmount0).add(amount))
+          expect( await token.allowance(deployer.address, exchange.address)).to.equal(ethers.BigNumber.from(allowance).sub(amount));
+        })
+
+        it("Emit a Transfer Event", async() => {
+          const event = result.events[0];
+          expect(event.event).to.equal("Transfer");
+          const args = event.args;
+          expect(args._from).to.equal(deployer.address)
+          expect(args._to).to.equal(receiver1.address)
+          expect(args._value).to.equal(amount)
+        })
+      }),
+
+      describe("Success", async() => {
+        it("Rejects without approval", async() => {
+          expect(await token.connect(exchange).transferFrom(deployer.address,receiver1.address, amount)).to.be.reverted;
+        })
+      })
 
     })
   });
