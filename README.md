@@ -1,13 +1,16 @@
-# Sample Hardhat Project
+## Sample Dex on Bid & Ask
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
+# Test Contracts
+```
 npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
+```
+
+#  Deploy Contracts
+```
+npx hardhat run --network localhost scripts/deploy.js
+```
+
+# Setup Contracts
+```
+npx hardhat run --network localhost scripts/setup.js
 ```
