@@ -152,9 +152,9 @@ const {ethers} = require("hardhat");
         })
       }),
 
-      describe("Success", async() => {
+      describe("Failure", async() => {
         it("Rejects without approval", async() => {
-          expect(await token.connect(exchange).transferFrom(deployer.address,receiver1.address, amount)).to.be.reverted;
+          await expect(token.connect(exchange).transferFrom(deployer.address,receiver1.address, amount+1)).to.be.reverted;
         })
       })
 

@@ -28,22 +28,22 @@ contract Token {
     }
 
     function _transfer(address _from, address _to, uint256 _value) internal {
-        require(balanceOf[_from] >= _value);
-        require(_to != address(0));
+        require(balanceOf[_from] >= _value, "insufficient balance");
+        require(_to != address(0), "invalid address");
         balanceOf[_from] = balanceOf[_from] - _value;
         balanceOf[_to] = balanceOf[_to] + _value;
         emit Transfer(_from, _to, _value);
     }
 
     function approve(address _spender, uint256 _value) public returns (bool success) {
-        require(_spender != address(0));
+        require(_spender != address(0), "invalid address");
         allowance[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
     }
 
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-        require(allowance[_from][msg.sender] >= _value);
+        require(allowance[_from][msg.sender] >= _value, "insufficient allowance");
         _transfer(_from, _to, _value);
         allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;
         emit Transfer(_from, _to, _value);
