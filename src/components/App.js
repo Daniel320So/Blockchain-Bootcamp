@@ -1,22 +1,28 @@
-import '../App.css';
 import {useEffect} from 'react';
-import {ethers} from 'ethers';
+import { useDispatch } from 'react-redux';
 import config from '../config.json'
-import tokenJson from '../contracts/Token.sol/Token.json'
-import exchangeJson from '../contracts/Exchange.sol/Exchange.json'
+
+
+import {loadProvider, loadNetwork, loadAccount, loadToken} from '../store/interaction'
 
 function App() {
 
+  const dispatch = useDispatch()
+
   const loadBlockchainData = async() => {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts'})
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const network = await provider.getNetwork();
 
-    const tokenA = new ethers.Contract(config[network.chainId]["TokenA"].address, tokenJson.abi, provider)
-    const mDai = new ethers.Contract(config[network.chainId]["mDai"].address, tokenJson.abi, provider)
-    const mETH = new ethers.Contract(config[network.chainId]["mETH"].address, tokenJson.abi, provider)
-    const exchange = new ethers.Contract(config[network.chainId]["exchange"].address, exchangeJson.abi, provider)
+    const account = await loadAccount(dispatch)
+    const provider = loadProvider(dispatch)
+    const chainId = await loadNetwork(provider, dispatch)
 
+ 
+    const tokenA = await loadToken(provider, config[chainId]["TokenA"], dispatch)
+    const mDai = await loadToken(provider, config[chainId]["mDai"], dispatch)
+    const mETH = await loadToken(provider, config[chainId]["mETH"], dispatch)
+    // const exchange = await loadToken(provider, config[chainId]["exchange"], dispatch)
+
+
+    
   }
 
   useEffect(() => {
