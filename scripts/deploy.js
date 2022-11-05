@@ -3,12 +3,15 @@ const hre = require("hardhat");
 async function main() {
 
   const accounts = await hre.ethers.getSigners();
+  console.log(await hre.ethers.provider)
 
   const Token = await hre.ethers.getContractFactory("Token");
   const Exchange = await hre.ethers.getContractFactory("Exchange")
   
-  const token1 = await Token.deploy("TokenA", "TokenA", "100000");
+  const token1 = await Token.deploy("Daniel", "DAN", "100000");
   await token1.deployed()
+  console.log(await token1.symbol())
+  
 
   const token2 = await Token.deploy("mDai", "mDai", "100000")
   await token2.deployed()
