@@ -3,7 +3,6 @@ const hre = require("hardhat");
 async function main() {
 
   const accounts = await hre.ethers.getSigners();
-  console.log(await hre.ethers.provider)
 
   const Token = await hre.ethers.getContractFactory("Token");
   const Exchange = await hre.ethers.getContractFactory("Exchange")
