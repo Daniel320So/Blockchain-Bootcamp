@@ -26,12 +26,9 @@ export const loadAccount = async(provider, dispatch) => {
 }
 
 export const loadTokens = async(provider, addresses, dispatch) => {
-    console.log("load Tokens", addresses[0], tokenJson.abi, provider)
     let token, symbol;
     token = new ethers.Contract(addresses[0], tokenJson.abi, provider);
-    console.log("load Tokens", token)
     symbol = await token.symbol();
-    console.log(token, symbol)
     dispatch({type:"TOKEN_1_LOADED", token, symbol});
     token = new ethers.Contract(addresses[1], tokenJson.abi, provider);
     symbol = await token.symbol();

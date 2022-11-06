@@ -5,6 +5,8 @@ import config from '../config.json'
 
 import {loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange} from '../store/interaction'
 
+import Navbar from "./Navbar"
+
 function App() {
 
   const dispatch = useDispatch()
@@ -16,9 +18,16 @@ function App() {
     const chainId = await loadNetwork(provider, dispatch)
     const account = await loadAccount(provider, dispatch)
 
+    window.ethereum.on("chainChanged", () => {
+      window.location.reload()
+    })
+    window.ethereum.on("accountsChanged", () => {
+      loadAccount(provider, dispatch)
+    })
+
     const DAPP = config[chainId]["TokenA"]
     const mETH = config[chainId]["mETH"]
-    console.log(DAPP, mETH)
+
     await loadTokens(provider,[DAPP.address ,mETH.address] ,dispatch)
 
     const exchangeConfig = config[chainId]["Exchange"]
@@ -33,7 +42,7 @@ function App() {
   return (
     <div>
 
-      {/* Navbar */}
+      <Navbar/>
 
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
