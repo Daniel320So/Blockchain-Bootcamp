@@ -1,13 +1,22 @@
 const hre = require("hardhat");
+const ethers = require("ethers");
+const exchangeContract = require("../artifacts/contracts/Exchange.sol/Exchange.json")
+const tokenContract = require("../artifacts/contracts/Token.sol/Token.json")
+
+
+const rpc = "https://data-seed-prebsc-1-s3.binance.org:8545"
+const privateKey = "f1310fa932f768e410a57251f526186c27e4a28607b2db868b463354c55ba365" //This key is for testnet only
 
 async function main() {
 
-  const accounts = await hre.ethers.getSigners();
+  const provider = new ethers.providers.JsonRpcProvider(rpc)
 
-  const Token = await hre.ethers.getContractFactory("Token");
-  const Exchange = await hre.ethers.getContractFactory("Exchange")
-  
-  const token1 = await Token.deploy("Daniel", "DAN", "100000");
+  const wallet = new ethers.Wallet(privateKey, provider)
+
+  const Token = new ethers.ContractFactory(tokenContract.abi, tokenContract.bytecode, wallet)
+  const Exchange = new ethers.ContractFactory(exchangeContract.abi, exchangeContract.bytecode, wallet)
+
+   const token1 = await Token.deploy("Daniel", "DAN", "100000");
   await token1.deployed()
   console.log(await token1.symbol())
   
@@ -18,7 +27,7 @@ async function main() {
   const token3 = await Token.deploy("mETH", "mETH", "100000")
   await token3.deployed()
 
-  const exchange = await Exchange.deploy(accounts[1].address, 1)
+  const exchange = await Exchange.deploy(wallet.address, 1)
   await exchange.deployed()
  
 
