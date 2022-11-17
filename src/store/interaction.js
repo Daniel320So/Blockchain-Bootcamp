@@ -51,6 +51,9 @@ export const subscribeToEvent = (exchange, dispatch) => {
     exchange.on("WithdrawToken", (event) => {
         dispatch({type: "TRANSFER_SUCCESS", event})
     })
+    exchange.on("NewOrder", (event) => {
+        dispatch({type: "MAKE_ORDER_SUCCESS", event})
+    })
 }
 
 export const loadUserBalance = async(exchange, tokens, account, dispatch) => {
@@ -93,5 +96,31 @@ export const transferTokens = async(provider, exchange, transferType, token, amo
         } catch(err) {
             dispatch({type:"TRANSFER_FAILED"})
         }
+    }
+}
+
+export const makeOrder = async (provider, exchange, type, token0, token1, amount, price, dispatch) => {
+
+    let transaction, tokenGet, tokenGive
+    const signer = provider.getSigner()
+    const amountGet = ethers.utils.parseUnits(amount.toString(), 18).mul(price)
+    const amountGive = ethers.utils.parseUnits(amount.toString(), 18)
+    console.log(amountGet, amountGive)
+
+    dispatch({type:"ORDER_REQUEST"})
+
+    if (type === "Buy") {
+        tokenGet = token0
+        tokenGive = token1
+    } else if (type === "Sell") {
+        tokenGet = token1
+        tokenGive = token0
+    }
+
+    try {
+        transaction = await exchange.connect(signer).makeOrder(tokenGet.address, amountGet, tokenGive.address, amountGive);
+        await transaction.wait()
+    } catch(err) {
+        dispatch({type:"ORDER_FAILED"})
     }
 }
