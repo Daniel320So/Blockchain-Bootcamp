@@ -1,18 +1,19 @@
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import config from '../config.json'
 
 
-import {loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange} from '../store/interaction'
+import { loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange, subscribeToEvent } from '../store/interaction'
 
 import Navbar from "./Navbar"
+import Markets from './Market';
+import Balance from './Balance';
 
 function App() {
 
   const dispatch = useDispatch()
 
   const loadBlockchainData = async() => {
-
 
     const provider = loadProvider(dispatch)
     const chainId = await loadNetwork(provider, dispatch)
@@ -21,18 +22,20 @@ function App() {
     window.ethereum.on("chainChanged", () => {
       window.location.reload()
     })
+
     window.ethereum.on("accountsChanged", () => {
       loadAccount(provider, dispatch)
     })
 
-    const DAPP = config[chainId]["TokenA"]
+    const DAN = config[chainId]["DAN"]
     const mETH = config[chainId]["mETH"]
 
-    await loadTokens(provider,[DAPP.address ,mETH.address] ,dispatch)
+    await loadTokens(provider,[DAN.address ,mETH.address] ,dispatch)
 
     const exchangeConfig = config[chainId]["Exchange"]
     const exchange = await loadExchange(provider, exchangeConfig.address, dispatch)
 
+    subscribeToEvent(exchange, dispatch)
   }
 
   useEffect(() => {
@@ -47,9 +50,9 @@ function App() {
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
 
-          {/* Markets */}
+          <Markets/>
 
-          {/* Balance */}
+          <Balance/>
 
           {/* Order */}
 

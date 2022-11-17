@@ -11,7 +11,6 @@ const Navbar = () => {
     const dispatch = useDispatch()
     const provider = useSelector(state => state.provider)
     const chainId = provider.chainId
-    console.log(chainId)
     const account = provider.account
     const balance = provider.balance
     const trunAccount = account? account.slice(0,5) + "..." + account.slice(38,42) : ""

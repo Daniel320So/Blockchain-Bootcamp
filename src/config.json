@@ -3,14 +3,14 @@
         "Exchange": {
             "address": "0x45c17F122A578e8F42aa62e8A9Db9b024702a113"
         },
-        "TokenA" : {
+        "DAN" : {
             "address": "0x44424D8E846c8Ed1CFE96D14c1a20a4c6FD2d0a9"
         },
         "mETH" : {
-            "address": "0xd5EDDB125Bb704001E59Ef820ea0C247ED68f59b"
+            "address": "0x46B40c75a9A041159D6504a9ccaA769e1990A1c9"
         },
         "mDai" : {
-            "address": "0x46B40c75a9A041159D6504a9ccaA769e1990A1c9"
+            "address": "0xd5EDDB125Bb704001E59Ef820ea0C247ED68f59b"
         }
     }
 }
