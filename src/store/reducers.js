@@ -78,6 +78,30 @@ export const exchange = (state=DEFAULT_EXCHANGE_STATE, action) => {
                 loaded: true,
                 contract: action.exchange
             }
+        case "ALL_ORDERS_LOADED":
+            return {
+                ...state,
+                allOrders: {
+                    loaded: true,
+                    data: action.allOrders
+                }
+            }
+        case "CANCELLED_ORDERS_LOADED":
+            return {
+                ...state,
+                cancelledOrders: {
+                    loaded: true,
+                    data: action.cancelledOrders
+                }
+            }
+        case "FILLED_ORDERS_LOADED":
+            return {
+                ...state,
+                filledOrders: {
+                    loaded: true,
+                    data: action.filledOrders
+                }
+            }
         case "EXCHANGE_TOKEN_1_BALANCE_LOADED":
             return {
                 ...state,
@@ -133,15 +157,25 @@ export const exchange = (state=DEFAULT_EXCHANGE_STATE, action) => {
                 transferInProgress: true
             }
         case "MAKE_ORDER_SUCCESS":
+            console.log(action)
+            let index = state.allOrders.data.findIndex(order => order[0].toString() === action.event.toString())
+            let data = state.allOrders;
+            if(index === -1) {
+                data = [...state.allOrders.data, action.order]
+            }
+
             return {
                 ...state,
+                allOrders: {
+                    ...state.allOrders,
+                    data
+                },
                 transaction: {
                     transactionType: "MAKE_ORDER",
                     isPending: false,
                     isSuccessful: true
                 },
                 transferInProgress: false,
-                events: [action.event, ...state.events]
             }
         case "MAKE_ORDER_FAIL":
             return {

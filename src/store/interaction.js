@@ -45,16 +45,20 @@ export const loadExchange = async(provider, address, dispatch) => {
 }
 
 export const subscribeToEvent = (exchange, dispatch) => {
-    exchange.on("DepositToken", (event) => {
-        dispatch({type: "TRANSFER_SUCCESS", event})
+    exchange.on('DepositToken', (token, user, amount, balance, event) => {
+      dispatch({ type: 'TRANSFER_SUCCESS', event })
     })
-    exchange.on("WithdrawToken", (event) => {
-        dispatch({type: "TRANSFER_SUCCESS", event})
+  
+    exchange.on('WithdrawToken', (token, user, amount, balance, event) => {
+      dispatch({ type: 'TRANSFER_SUCCESS', event })
     })
-    exchange.on("NewOrder", (event) => {
-        dispatch({type: "MAKE_ORDER_SUCCESS", event})
+  
+    exchange.on('NewOrder', (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
+      const order = event.args
+      console.log("order", order, event)
+      dispatch({ type: 'MAKE_ORDER_SUCCESS', order, event })
     })
-}
+  }
 
 export const loadUserBalance = async(exchange, tokens, account, dispatch) => {
     let balance = await tokens[0].balanceOf(account)
@@ -72,6 +76,24 @@ export const loadUserBalance = async(exchange, tokens, account, dispatch) => {
     balance = await exchange.userBalance(tokens[1].address, account)
     balance = Number(ethers.utils.formatUnits(balance, 18))
     dispatch({type:"EXCHANGE_TOKEN_2_BALANCE_LOADED", balance});
+}
+
+export const loadAllOrders = async (provider, exchange, dispatch) => {
+
+    const initBlock = 24654888
+    const block = await provider.getBlockNumber();
+
+    const orderStream = await exchange.queryFilter("NewOrder", initBlock, block)
+    const allOrders = orderStream.map(event => event.args)
+    dispatch({type: "ALL_ORDERS_LOADED", allOrders })
+
+    const cancelStream = await exchange.queryFilter("CancelOrder", initBlock, block)
+    const cancelledOrders = cancelStream.map(event => event.args)
+    dispatch({type: "CANCELLED_ORDERS_LOADED", cancelledOrders })
+
+    const fillStream = await exchange.queryFilter("Trade", initBlock, block)
+    const filledOrders = fillStream.map(event => event.args)
+    dispatch({type: "FILLED_ORDERS_LOADED", filledOrders })
 }
 
 export const transferTokens = async(provider, exchange, transferType, token, amount, dispatch) => {

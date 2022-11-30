@@ -3,12 +3,13 @@ import { useDispatch } from 'react-redux';
 import config from '../config.json'
 
 
-import { loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange, subscribeToEvent } from '../store/interaction'
+import { loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange, subscribeToEvent, loadAllOrders } from '../store/interaction'
 
 import Navbar from "./Navbar";
 import Markets from './Market';
 import Balance from './Balance';
 import Order from "./Order";
+import OrderBook from './OrderBook';
 
 function App() {
 
@@ -35,6 +36,8 @@ function App() {
 
     const exchangeConfig = config[chainId]["Exchange"]
     const exchange = await loadExchange(provider, exchangeConfig.address, dispatch)
+    
+    loadAllOrders(provider, exchange, dispatch)
 
     subscribeToEvent(exchange, dispatch)
   }
@@ -66,7 +69,7 @@ function App() {
 
           {/* Trades */}
 
-          {/* OrderBook */}
+          <OrderBook/>
 
         </section>
       </main>
